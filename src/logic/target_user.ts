@@ -3,8 +3,9 @@ import { BadgeRepository } from "../repository/badge.repo";
 import { ContractRepository } from "../repository/contract.repo";
 import { RawTransactionRepository } from "../repository/raw_transaction.repo";
 import { UserTxActivityRepository } from "../repository/user_tx_activity.repo";
+import { UserBadgeRepository } from "../repository/user_badge.repo";
 import { logger } from "../logger/winston";
-import { UserBadgeRepository } from "src/repository/user_badge.repo";
+import { ExceptionHandler, exceptions } from "winston";
 
 
 //비즈니스로직에서 특정유저의 활동에 대한 갱신을 수행한다.(Focus!)
@@ -31,7 +32,6 @@ async function _updateUserTxActivityDB(user: Document) {
     const contract: Document = contracts[i];
     const categoryIds: Array<Number> = contract["category"];
     const badges: Array<Document> = await badgeRepo.findDoc({category_id: { $in: categoryIds}});
-    logger.debug(`Badges: ${badges}, CategoryIds: ${categoryIds}`);
     for (const j in badges) {
       const badge: Document = badges[j];
       await _updateBadgeProgress(user, contract, badge);
@@ -103,7 +103,6 @@ async function _updateUserBadgeDB(user: Document) {
     const contract: Document = contracts[i];
     const categoryIds: Array<Number> = contract["category"];
     const badges: Array<Document> = await badgeRepo.findDoc({category_id: { $in: categoryIds}});
-    logger.debug(`Badges: ${badges}, CategoryIds: ${categoryIds}`);
     for (const j in badges) {
       const badge: Document = badges[j];
       await _updateBadgeAcquire(user, contract, badge);
@@ -119,11 +118,14 @@ async function _updateBadgeAcquire(user: Document, contract: Document, badge: Do
   logger.debug(`badgeAcuire: ${obj}, ${badge._id}`);
   //BadgeAcquire갱신로직
   if (obj == null) {
-    const userTxActivityDoc = userTxActivityRepo.findDocByID(user.id);
+    const userTxActivityDoc: Document = await userTxActivityRepo.findDocByID(user.id);
+    if (userTxActivityDoc == null) {
+      return;
+    }
     //COUNT일때는 number처리
     const srcValue: number = userTxActivityDoc["badges"].id(badge.id)["value"];
     const isAcquire: boolean = srcValue > badge["target_value"];
-    user["badges"].push({_id: badge["id"], acuire: isAcquire, visible: true});
+    user["badges"].push({_id: badge.id, acquire: isAcquire, visible: true});
   } else {
     
     let isAcquire: boolean = user["badges"].id(badge._id)["acquire"];
@@ -131,7 +133,7 @@ async function _updateBadgeAcquire(user: Document, contract: Document, badge: Do
       return;
     }
 
-    const userTxActivityDoc = userTxActivityRepo.findDocByID(user.id);
+    const userTxActivityDoc = await userTxActivityRepo.findDocByID(user.id);
     //COUNT일때는 number처리
     const srcValue: number = userTxActivityDoc["badges"].id(badge.id)["value"];
     isAcquire = srcValue > badge["target_value"];

@@ -1,8 +1,10 @@
 import type { Document } from "mongoose";
 import { dbConnector } from "./db_connector";
 import { logger } from "./logger/winston";
-import { preloadUserTxActivityDB } from "./logic/preload";
+import { preloadUserBadgeDB, preloadUserTxActivityDB } from "./logic/preload";
 import { updateUserBadgeDB, updateUserTxActivityDB } from "./logic/target_user";
+
+const IS_PRELOAD: boolean = true;
 
 async function main() {
   logger.debug("Start!");
@@ -23,8 +25,7 @@ async function main() {
 }
 
 async function UserTxActivityDB(userId: string) {
-  const isPreload: boolean = true;
-  if (isPreload) {
+  if (IS_PRELOAD) {
     //2-1. TXDB에서 EOA를 추출하여 활동DB를 갱신합니다.
     await preloadUserTxActivityDB();
   } else {
@@ -35,8 +36,9 @@ async function UserTxActivityDB(userId: string) {
 }
 
 async function UserBadgeDB(userId: string) {
-  const isPreload: boolean = true;
-  if (isPreload) {
+  if (IS_PRELOAD) {
+    //2-1. TXDB에서 EOA를 추출하여 뱃지DB를 갱신합니다.
+    await preloadUserBadgeDB();
   } else {
     //3-2
     const user: Document = await updateUserBadgeDB(userId);
