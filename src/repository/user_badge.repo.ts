@@ -1,12 +1,12 @@
 import type{ Document, Model } from "mongoose";
 import { dbConnector } from "../db_connector";
 import { logger } from "../logger/winston";
-import { userTxActivitySchema } from "../model/user_tx_activity.schema";
+import { userBadgeSchema } from "../model/user_badge.schema";
 
-export class UserTxActivityRepository {
+export class UserBadgeRepository {
   private readonly _model: Model<unknown>;
   constructor() {
-    this._model = dbConnector.connection.model('UserTxActivity', userTxActivitySchema);
+    this._model = dbConnector.connection.model('UserBadge', userBadgeSchema);
   }
 
   get model(): Model<unknown> {
@@ -21,7 +21,7 @@ export class UserTxActivityRepository {
     return await this._model.findById(id);
   }
 
-  public async createUserActivity(id: string): Promise<Document> {
+  public async createUserBadge(id: string): Promise<Document> {
     return new this._model({_id: id});
   }
 

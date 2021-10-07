@@ -1,10 +1,10 @@
 import { Schema, SchemaOptions } from "mongoose";
 
 const badgeProgress = {
-  _id: {type: String, require: true},
+  _id: {type: Number, require: true},
   type: {type: String, require: true},
   value: {type : String, required: true},
-  sync_bh: {type : Number, required: false},
+  sync_bh: {type : Number, required: false, default: 0},
 }
 
 const badgeProgressOption: SchemaOptions = {
