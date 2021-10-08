@@ -1,31 +1,16 @@
-import type{ Document, Model } from "mongoose";
-import { dbConnector } from "../db_connector";
-import { logger } from "../logger/winston";
-import { userBadgeSchema } from "../model/user_badge.schema";
+import { IUserBadge, userBadgeSchema } from "./model/user_badge.schema";
+import { BaseRepository } from "./base_repo";
 
-export class UserBadgeRepository {
-  private readonly _model: Model<unknown>;
+export class UserBadgeRepository extends BaseRepository {
   constructor() {
-    this._model = dbConnector.connection.model('UserBadge', userBadgeSchema);
+    super("UserBadge", userBadgeSchema);
   }
 
-  get model(): Model<unknown> {
-    return this._model;
-  }
-
-  public async findDoc(query: Record<string, any>, fields?: Record<string, any>): Promise<Array<Document>> {
-    return await this._model.find(query, fields);
-  }
-
-  public async findDocByID(id: string): Promise<Document> {
-    return await this._model.findById(id);
-  }
-
-  public async createUserBadge(id: string): Promise<Document> {
+  public async createDocument(id: string): Promise<any> {
     return new this._model({_id: id});
   }
 
-  public async bulkSave(docs: Array<Document>){
+  public async bulkSave(docs: Array<any>){
     await this._model.bulkSave(docs);
   }
 }

@@ -2,17 +2,17 @@ import type { Document } from "mongoose";
 import { UserBadgeRepository } from "../repository/user_badge.repo";
 import { logger } from "../logger/winston";
 import { RawTransactionRepository } from "../repository/raw_transaction.repo";
-import { UserTxActivityRepository } from "../repository/user_tx_activity.repo";
-import { updateUserBadgeDB, updateUserTxActivityDB } from "./target_user";
+import { UserBadgeProgressRepository } from "../repository/user_badge_progress.repo";
+import { updateUserBadgeDB, updateUserBadgeProgressDB } from "./target_user";
 
 //백단에서 전체유저의 활동에 대한 갱산을 수행한다.
-export async function preloadUserTxActivityDB() {
+export async function preloadUserBadgeProgressDB() {
   const rawTxRepo = new RawTransactionRepository();
-  const userTxActivityRepo = new UserTxActivityRepository();
+  const userBadgeProgressRepo = new UserBadgeProgressRepository();
 
   //1. FromAddress를 모두 구한다.
-  //2. 순회하면서 UserActivity를 갱신한다.
-  //2-1. 새로생긴 유저라면 UserTxActivity Doc를 추가한다.
+  //2. 순회하면서 UserBadgeProgress를 갱신한다.
+  //2-1. 새로생긴 유저라면 UserBadgeProgress Doc를 추가한다.
   const ids: Array<string> = await rawTxRepo.getFromList();
 
   const bulkSize: number = 10;
@@ -24,12 +24,12 @@ export async function preloadUserTxActivityDB() {
   
     for (const index in tmp) {
       const id: string = tmp[index];
-      const user: Document = await updateUserTxActivityDB(id);
+      const user: Document = await updateUserBadgeProgressDB(id);
       users.push(user);
       logger.debug(`count: ${users.length}`)
     }
     logger.debug(`i: ${i}, tmp.length: ${tmp.length}`)
-    await userTxActivityRepo.bulkSave(users);
+    await userBadgeProgressRepo.bulkSave(users);
   }
 }
 

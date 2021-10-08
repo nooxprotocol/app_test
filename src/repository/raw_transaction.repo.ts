@@ -1,53 +1,35 @@
-import type{ Document, Model } from "mongoose";
-import { dbConnector } from "../db_connector";
 import { logger } from "../logger/winston";
-import { rawTransactionSchema } from "../model/raw_transaction.schema";
-import { sampleFileLoader } from "../sample_file_loader";
+import { rawTransactionSchema, IRawTransaction } from "./model/raw_transaction.schema";
+import { BaseRepository } from "./base_repo";
 
-export class RawTransactionRepository {
-  private readonly _model: Model<unknown>;
+export class RawTransactionRepository extends BaseRepository {
   constructor() {
-    this._model = dbConnector.connection.model('RawTransaction', rawTransactionSchema);
+    super("RawTransaction", rawTransactionSchema);
   }
 
-  public async initDb() {
-    const arr: Array<Record<string, any>>= await sampleFileLoader("./sample/transaction.json");
-    const bulkSize: number = 100000;
-    const loopSize: number = Math.floor(arr.length / bulkSize) + 1;
-
-    for (let i = 0; i < loopSize; ++i) {
-      const tmp = arr.splice(0, bulkSize);
-      const models = [];
-      for (const index in tmp) {
-        const data = tmp[index];
-        data["_id"] = data["hash"];
-        //logger.debug(data);
-        const model = new this._model(data);
-        models.push(model);
-      }
-      logger.debug(`i: ${i}, tmp.length: ${tmp.length}`)
-      await this._model.bulkSave(models);
+  public async initDB() {
+    for (let i=0; i<5; i++) {
+      await this._initDB(`./sample/transaction/transaction_${i}.json`, 100_000, "hash");
     }
   }
 
   public async getFromList(): Promise<Array<string>> {
-    return await this._model.distinct("from_address");
+    const doc = await this._model.aggregate([{$group: {_id: "$from_address"}}]);
+    var result = doc.map(x => x._id);
+    return result;
   }
 
-  // public async aggregate() {
-  //   const docs = await this._model.aggregate([
-  //     {
-  //       $group: {
-  //         _id: "$from_address",
-  //         count: { $sum: 1 }
-  //       },
-  //     },
-  //     { $project : { from_address : 1 } }
-  //   ]);
-  //   logger.debug(docs);
-  // }
-
-  public async findDoc(query: Record<string, any>, fields?: Record<string, any>): Promise<Array<Document>> {
-    return await this._model.find(query, fields);
+  //호출 많이 받는 순으로 to_address 조회
+  public async debugAggregatePrt() {
+    const docs = await this._model.aggregate([
+      {
+        $group: {
+          _id: "$to_address",
+          count: { $sum: 1 }
+        },
+      },
+      { $project : { from_address : 1 } }
+    ]);
+    logger.debug(docs);
   }
 }
