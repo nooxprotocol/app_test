@@ -1,14 +1,13 @@
-import * as fs from 'fs'
-import * as ndjson from 'ndjson'
+import * as fs from 'fs';
+import * as ndjson from 'ndjson';
 import { logger } from './logger/winston';
 
-const TAG: string = "sampleFileLoader";
-export async function sampleFileLoader(path: string): Promise<Array<Record<string, any>>> {
-  
+const TAG = 'sampleFileLoader';
+export async function sampleFileLoader(
+  path: string,
+): Promise<Array<Record<string, any>>> {
   return await new Promise((resolve, reject) => {
-    logger.debug(
-      `[${TAG}] path: ${path}`,
-    );
+    logger.debug(`[${TAG}] path: ${path}`);
     const items: Array<Record<string, any>> = [];
     const fileContents = fs.createReadStream(`${path}`);
     fileContents
@@ -21,14 +20,10 @@ export async function sampleFileLoader(path: string): Promise<Array<Record<strin
       })
       .on('finish', (e) => {
         if (e) {
-          logger.debug(
-            `[${TAG}] Error: ${e}`,
-          );
+          logger.debug(`[${TAG}] Error: ${e}`);
           return reject(e);
         }
-        logger.debug(
-          `[${TAG}] Success: len(items}: ${items.length}`,
-        );
+        logger.debug(`[${TAG}] Success: len(items}: ${items.length}`);
         resolve(items);
       });
   });
