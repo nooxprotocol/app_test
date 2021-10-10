@@ -1,4 +1,5 @@
-import { Controller, Get, Injectable, Param, Post } from '@nestjs/common';
+import { Controller, Get, Injectable, Post, Query } from '@nestjs/common';
+import { logger } from 'src/logger/winston';
 import { EndpointService } from './endpoint.service';
 
 @Injectable()
@@ -42,12 +43,17 @@ export class EndpointController {
   }
 
   @Post('update_user_badge_progress')
-  async updateUserBadgeProgress(@Param('id') id: string) {
+  async updateUserBadgeProgress(@Query('id') id: string) {
     return await this.service.updateUserBadgeProgress(id);
   }
 
   @Post('update_user_badge')
-  async updateUserBadge(@Param('id') id: string) {
+  async updateUserBadge(@Query('id') id: string) {
     return await this.service.updateUserBadge(id);
+  }
+
+  @Get('get_badge')
+  async getBadge(@Query('id') id: string) {
+    return await this.service.getBadge(id);
   }
 }

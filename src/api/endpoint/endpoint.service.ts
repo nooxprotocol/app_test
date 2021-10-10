@@ -42,7 +42,6 @@ export class EndpointService {
   }
 
   async findUserBadgeProgressDocs(): Promise<UserBadgeProgressDocument[]> {
-    logger.debug('aaa');
     return this.userBadgeProgressModel.find({}).exec();
   }
 
@@ -71,18 +70,35 @@ export class EndpointService {
   }
 
   async updateUserBadgeProgress(id: string): Promise<string> {
-    const doc: Document = await this.updateUserBadgeProgressDB(id);
+    const user = await this.updateUserBadgeProgressDB(id);
+    user.save();
     return `Updated BadgeProgress: ${id}`;
   }
 
   async updateUserBadge(id: string): Promise<string> {
+    const user = await this.updateUserBadgeDB(id);
+    user.save();
     return `Updated Badge: ${id}`;
+  }
+
+  async getBadge(id: string): Promise<string> {
+    const doc = await this.userBadgeModel.aggregate([
+      { $match: { _id: id } },
+      { $unwind: '$badges' },
+      { $match: { 'badges.acquire': { $eq: true } } },
+      { $group: { _id: '$_id', list: { $push: '$badges._id' } } },
+    ]);
+
+    logger.debug(`${id}: ${JSON.stringify(doc)}`);
+    return `Updated Badge: ${JSON.stringify(doc)}`;
   }
 
   // //====임시====//
   //비즈니스로직에서 특정유저의 활동에 대한 갱신을 수행한다.(Focus!)
-  private async updateUserBadgeProgressDB(id: string): Promise<Document> {
+  private async updateUserBadgeProgressDB(id: string) {
+    logger.debug(`A-1) id: ${id}`);
     let user = await this.userBadgeProgressModel.findById(id);
+    logger.debug(`A-2) ${user}, id: ${id}`);
     if (user == null) {
       user = await this.userBadgeProgressModel.create({ _id: id });
       logger.debug(`Create User: ${user}`);
@@ -182,7 +198,7 @@ export class EndpointService {
 
   //비즈니스로직에서 특정유저의 뱃지에 대한 갱신을 수행한다.
   //TODO
-  private async updateUserBadgeDB(id: string): Promise<Document> {
+  private async updateUserBadgeDB(id: string) {
     let user = await this.userBadgeModel.findById(id);
     if (user == null) {
       user = await this.userBadgeModel.create({ _id: id });
