@@ -40,7 +40,9 @@ export async function initDirDB(
   const list = await getFileList(dirPath);
   for (const index in list) {
     const path: string = list[index];
-    const arr: Array<Record<string, any>> = await sampleFileLoader(path);
+    const arr: Array<Record<string, any>> = await sampleFileLoader(
+      `${dirPath}/${path}`,
+    );
     const loopSize: number = Math.floor(arr.length / bulkSize) + 1;
 
     for (let i = 0; i < loopSize; ++i) {
