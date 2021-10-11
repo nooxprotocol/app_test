@@ -37,9 +37,14 @@ export class EndpointController {
     return await this.service.findUserBadgeDocs();
   }
 
-  @Post('init_db')
-  async initDB() {
-    return await this.service.initDB();
+  @Post('init_sample_db')
+  async initSampleDB() {
+    return await this.service.initSampleDB();
+  }
+
+  @Post('init_raw_tx')
+  async initRawTxDB(@Query('dirPath') dirPath: string) {
+    return await this.service.initRawTxDB(dirPath);
   }
 
   @Post('update_user_badge_progress')

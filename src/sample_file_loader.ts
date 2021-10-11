@@ -28,3 +28,24 @@ export async function sampleFileLoader(
       });
   });
 }
+
+export async function getFileList(dirPath: string) {
+  const TAG = 'getFileList';
+  const EXT = 'json';
+  logger.debug(
+    `[${TAG}] getFilesFromDir Start) ext: ${EXT} dirName: ${dirPath}`,
+  );
+  const items: Array<string> = [];
+  const files: Array<string> = fs.readdirSync(dirPath);
+
+  for (const file of files) {
+    const ext = file.split('.').pop();
+    if (ext === `${EXT}`) {
+      items.push(file);
+    }
+  }
+  logger.debug(
+    `[${TAG}] getFilesFromDir Success: ext: ${EXT} dirName: ${dirPath}`,
+  );
+  return items;
+}

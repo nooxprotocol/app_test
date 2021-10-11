@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { logger } from 'src/logger/winston';
-import { initDB } from './logic/init_db';
+import { initDB, initDirDB } from './logic/init_db';
 import { BadgeDocument } from './schema/badge.schema';
 import { ContractDocument } from './schema/contract.schema';
 import { ContractCategoryDocument } from './schema/contract_category.schema';
@@ -49,7 +49,7 @@ export class EndpointService {
     return this.userBadgeModel.find({}).exec();
   }
 
-  async initDB(): Promise<string> {
+  async initSampleDB(): Promise<string> {
     await initDB(this.badgeModel, './sample/badge.json', 100_000, 'id');
     await initDB(
       this.contractModel,
@@ -66,6 +66,11 @@ export class EndpointService {
       );
     }
 
+    return 'InitDB Success';
+  }
+
+  async initRawTxDB(dirPath: string): Promise<string> {
+    await initDirDB(this.rawTransactionModel, dirPath, 100_000, 'hash');
     return 'InitDB Success';
   }
 
