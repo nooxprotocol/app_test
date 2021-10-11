@@ -58,4 +58,5 @@ export async function initDirDB(
       await model.bulkSave(models);
     }
   }
+  logger.debug(`initDirDB ${dirPath} Done`);
 }

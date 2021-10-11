@@ -70,7 +70,7 @@ export class EndpointService {
   }
 
   async initRawTxDB(dirPath: string): Promise<string> {
-    await initDirDB(this.rawTransactionModel, dirPath, 100_000, 'hash');
+    initDirDB(this.rawTransactionModel, dirPath, 100_000, 'hash');
     return 'InitDB Success';
   }
 
