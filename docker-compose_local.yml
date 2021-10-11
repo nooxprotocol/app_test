@@ -1,0 +1,12 @@
+version: '3'
+services:
+  mongodb:
+    image: mongo
+    ports:
+      - '${MONGO_PORT}:27017'
+    volumes:
+      - /raid0/app_test/mongo_db/data/db:/data/db
+      - /raid0/app_test/mongo_db/config/db_init.sh:/docker-entrypoint-initdb.d/db_init.sh
+    container_name: 'docker-mongodb'
+    env_file:
+      - ./.env
